@@ -1,0 +1,90 @@
+#pandas read excel example 
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression  
+from sklearn.model_selection import train_test_split  
+from sklearn.cluster import KMeans  
+from sklearn.metrics import mean_squared_error 
+
+import os
+print(os.getcwd())
+
+df = pd.read_excel('DATA.xlsx')
+#file_path = "C:/Users/user/Downloads/DATA.xlsx"
+#xls = pd.ExcelFile(file_path)
+
+print("FIRST STROKES")
+print(df.head())
+
+ #Как заполнить NaN средним значением pandas 
+#pandas fill NaN with mean
+df = df.replace(['-', '...', 'x'], pd.NA)
+df = df.fillna(df.mean(numeric_only=True))
+df = df.fillna("NO DATA")
+print("AFTER CLEANING")
+print(df.head())
+
+# ЧАСТЬ 3: CALCULATE STATISTICS (если нужно  "посчитать среднее", "найти максимум" и т.д.)
+#pandas mean max min example
+
+print("Среднее значение:", df['T1'].mean())
+print("Максимальное значение:", df['T1'].max())
+print("Минимальное значение:", df['T1'].min())
+print("Сколько всего строк:", len(df))  #сколько строк
+
+# ЧАСТЬ 4: Группировка (если нужна группировка типо "посчитать среднее по регионам" или что-то подобное) 
+#pandas groupby mean example
+grouped = df.groupby('Region')['T1'].mean()
+print("Среднее по регионам:", grouped)
+#сумма по группам
+grouped = df.groupby('Region')['T1'].sum()
+print("Сумма по регионам:\n", grouped)
+#количество записей в группе (count)
+grouped = df.groupby('Region')['T1'].count()
+print("Количество записей по регионам:\n", grouped)
+#min and max по группам
+grouped = df.groupby('Region')['T1'].agg(['min', 'max'])
+print("Минимум и максимум по регионам:\n", grouped)
+#MUSTHAVE!
+grouped = df.groupby('Region')['T1'].agg(['mean', 'sum', 'min', 'max'])
+print("Разные показатели по регионам:\n", grouped)
+
+
+# ЧАСТЬ 5: Фильтрация (если нужно "показать данные, где что-то больше/меньше") #pandas filter dataframe example
+# Заменить значение (например, 100)
+filtered = df[df['T1'] > 100]
+print("Данные, где T1 больше 100:")
+print(filtered.head())
+
+
+# ЧАСТЬ 6: Строим график (если нужно "построить график" / "визуализировать") 
+#matplotlib bar chart example
+plt.bar(df['Region'], df['T1'])
+plt.title("GRAPHIC")  
+plt.xticks(rotation=90)  
+plt.show()
+
+
+# ЧАСТЬ 7: Предсказание (если нужно "сделать предсказание" или "использовать sklearn для регрессии")
+#sklearn LinearRegression example
+X = df[['T2']]
+y = df['T1']
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+model = LinearRegression()
+model.fit(X_train, y_train)
+y_pred = model.predict(X_test)
+print("MY PREDICTS:", y_pred)
+#?
+print("MISTAKES IN PREDICT(MSE):", mean_squared_error(y_test, y_pred))
+
+
+# ЧАСТЬ 8: Кластеризация (если нужно "сделать кластеризацию" или "сгруппировать данные с помощью sklearn")
+#sklearn KMeans example
+data = df[['T1', 'T2']]
+kmeans = KMeans(n_clusters=3)
+kmeans.fit(data)
+df['Группа'] = kmeans.labels_
+plt.scatter(df['T2'], df['T1'], c=df['Group'])
+plt.title("CLASTERIZACIYA") 
+plt.show()
